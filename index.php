@@ -1,0 +1,145 @@
+<?php
+
+declare(strict_types=1);
+require __DIR__ . '/inc/bootstrap.php';
+require __DIR__ . '/inc/ledger.php';
+require_login();
+
+$funds = funds_list();
+if (!$funds) {
+  page_header('Ledger', 'ledger');
+  echo '<main class="page"><p>No tabs yet. Import schema.sql to create them.</p></main>';
+  page_footer();
+  exit;
+}
+$fundId = (int)($_GET['fund'] ?? $funds[0]['id']);
+if (!in_array($fundId, array_map('intval', array_column($funds, 'id')), true)) {
+  $fundId = (int)$funds[0]['id'];
+}
+$divisions = db()->query("SELECT DISTINCT division FROM employees WHERE division <> '' ORDER BY division")->fetchAll(PDO::FETCH_COLUMN);
+
+page_header('Ledger', 'ledger');
+?>
+<main class="page wide">
+  <nav class="tabs" role="tablist" aria-label="Ledger tabs">
+    <?php foreach ($funds as $f): ?>
+      <a role="tab" class="tab" href="index.php?fund=<?= (int)$f['id'] ?>"
+        <?= (int)$f['id'] === $fundId ? 'aria-selected="true"' : '' ?>><?= h($f['name']) ?></a>
+    <?php endforeach; ?>
+  </nav>
+
+  <section class="summary" id="summary" aria-live="polite"></section>
+
+  <section class="toolbar">
+    <button class="primary" id="btnToday">Collect today</button>
+    <label class="inline">Recording into
+      <span class="swatch" id="activeSwatch"></span>
+      <select id="activeCol"></select>
+    </label>
+    <label class="inline"><input type="checkbox" id="quick"> Tap a cell to pay the usual amount</label>
+    <span class="spacer"></span>
+    <input type="search" id="search" placeholder="Find an employee" aria-label="Find an employee">
+    <button id="btnAddPeriod">Add column</button>
+    <button id="btnAddEmp">Add employee</button>
+  </section>
+
+  <div class="gridwrap">
+    <table class="grid" id="grid" aria-label="Payments"></table>
+  </div>
+  <p class="hint" id="hint"></p>
+
+  <section>
+    <h2>Collections</h2>
+    <div id="legend" class="legend"></div>
+  </section>
+</main>
+
+<dialog id="payDlg">
+  <form id="payForm" class="stack">
+    <h3 id="payTitle"></h3>
+    <p class="muted" id="payMeta"></p>
+    <label id="amtRow">Amount <input type="number" name="amount" step="0.01" min="0" inputmode="decimal"></label>
+    <label>Paid by
+      <select name="mode">
+        <option value="cash">Cash</option>
+        <option value="fund_transfer">Fund transfer</option>
+        <option value="direct">Paid directly to the recipient</option>
+        <option value="care_of">Paid care of another office</option>
+        <option value="exempt">Exempt, does not have to pay</option>
+      </select>
+    </label>
+    <label id="colRow">Collection <select name="collection_id"></select></label>
+    <label id="newDateRow" hidden>Collection date <input type="date" name="new_date"></label>
+    <label>Note <input name="note" maxlength="255" placeholder="Optional"></label>
+    <p class="err" id="payErr" role="alert"></p>
+    <div class="actions">
+      <button type="button" class="danger" id="payDelete">Delete payment</button>
+      <span class="spacer"></span>
+      <button type="button" data-close>Cancel</button>
+      <button class="primary" id="paySave">Save payment</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="remitDlg">
+  <form id="remitForm" class="stack">
+    <h3 id="remitTitle">Remit collection</h3>
+    <p class="muted" id="remitMeta"></p>
+    <label>Date remitted <input type="date" name="remitted_on" required></label>
+    <label>Amount <input type="number" name="amount" step="0.01" min="0.01" required inputmode="decimal"></label>
+    <label>How
+      <select name="mode">
+        <option value="cash">Cash</option>
+        <option value="fund_transfer">Fund transfer</option>
+        <option value="care_of">Care of another office</option>
+      </select>
+    </label>
+    <label>Reference <input name="reference" maxlength="100" placeholder="Receipt or transfer number (optional)"></label>
+    <p class="err" id="remitErr" role="alert"></p>
+    <div class="actions"><span class="spacer"></span><button type="button" data-close>Cancel</button><button class="primary">Save remittance</button></div>
+  </form>
+</dialog>
+
+<dialog id="periodDlg">
+  <form id="periodForm" class="stack">
+    <h3 id="periodTitle">Add a column</h3>
+    <p class="muted">A month, or a case such as a name that everyone contributes to.</p>
+    <label>Column name <input name="label" maxlength="40" required placeholder="Dec or Hautea"></label>
+    <label>Due date <input type="date" name="due_on"></label>
+    <p class="hint">Employees who started after this month do not owe it. Leave it empty if everyone owes it right away.</p>
+    <label>This column is for <select name="beneficiary_id"></select></label>
+    <p class="hint">The person it is for is not asked to pay it.</p>
+    <p class="err" id="periodErr" role="alert"></p>
+    <div class="actions"><span class="spacer"></span><button type="button" data-close>Cancel</button><button class="primary" id="periodSave">Add column</button></div>
+  </form>
+</dialog>
+
+<dialog id="empDlg">
+  <form id="empForm" class="stack">
+    <h3>Add an employee</h3>
+    <label>Name <input name="name" required maxlength="120" placeholder="Dela Cruz, Juan A."></label>
+    <label>Division <input name="division" list="divList" maxlength="30" placeholder="MSSD"></label>
+    <label>Started on <input type="date" name="start_on"></label>
+    <datalist id="divList"><?php foreach ($divisions as $d): ?><option value="<?= h($d) ?>"><?php endforeach; ?></datalist>
+    <label>Status
+      <select name="status">
+        <option value="enrolled">Enrolled</option>
+        <option value="not_enrolled">Not enrolled</option>
+        <option value="scholarship">On scholarship program</option>
+        <option value="transferred">Transferred</option>
+      </select>
+    </label>
+    <p class="err" id="empErr" role="alert"></p>
+    <div class="actions"><span class="spacer"></span><button type="button" data-close>Cancel</button><button class="primary">Add employee</button></div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+  window.EAP = {
+    fund: <?= $fundId ?>,
+    csrf: <?= json_encode(csrf_token()) ?>
+  };
+</script>
+<script src="assets/app.js"></script>
+<?php page_footer();
