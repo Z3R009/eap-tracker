@@ -16,6 +16,20 @@ $fundId = (int)($_GET['fund'] ?? $funds[0]['id']);
 if (!in_array($fundId, array_map('intval', array_column($funds, 'id')), true)) {
   $fundId = (int)$funds[0]['id'];
 }
+$nextYear = (int)date('Y');
+$latest = 0;
+$amounts = [];
+foreach ($funds as $f) {
+  if (preg_match('/^(\d{4})( Mandatory)?$/', $f['name'], $m)) {
+    $latest = max($latest, (int)$m[1]);
+    $amounts[$f['name']] = (float)$f['default_amount'];
+  }
+}
+if ($latest) {
+  $nextYear = $latest + 1;
+}
+$monthlyAmt = $amounts[(string)$latest] ?? 50;
+$mandatoryAmt = $amounts[$latest . ' Mandatory'] ?? 100;
 $divisions = db()->query("SELECT DISTINCT division FROM employees WHERE division <> '' ORDER BY division")->fetchAll(PDO::FETCH_COLUMN);
 
 page_header('Ledger', 'ledger');
@@ -41,6 +55,7 @@ page_header('Ledger', 'ledger');
     <input type="search" id="search" placeholder="Find an employee" aria-label="Find an employee">
     <button id="btnAddPeriod">Add column</button>
     <button id="btnAddEmp">Add employee</button>
+    <?php if (is_admin()): ?><button id="btnNewYear">New year</button><?php endif; ?>
   </section>
 
   <div class="gridwrap">
@@ -133,6 +148,20 @@ page_header('Ledger', 'ledger');
     <div class="actions"><span class="spacer"></span><button type="button" data-close>Cancel</button><button class="primary">Add employee</button></div>
   </form>
 </dialog>
+
+<?php if (is_admin()): ?>
+  <dialog id="yearDlg">
+    <form id="yearForm" class="stack">
+      <h3>Start a new year</h3>
+      <p class="muted">Creates two tabs: the monthly tab with Jan to Dec, and a Mandatory tab with no columns yet. Your employee list is shared, and the old tabs stay as they are.</p>
+      <label>Year <input type="number" name="year" min="2000" max="2100" value="<?= $nextYear ?>" required></label>
+      <label>Monthly amount per person <input type="number" name="monthly_amount" step="0.01" min="0.01" value="<?= h($monthlyAmt) ?>" required></label>
+      <label>Usual Mandatory amount per person <input type="number" name="mandatory_amount" step="0.01" min="0.01" value="<?= h($mandatoryAmt) ?>" required></label>
+      <p class="err" id="yearErr" role="alert"></p>
+      <div class="actions"><span class="spacer"></span><button type="button" data-close>Cancel</button><button class="primary">Create tabs</button></div>
+    </form>
+  </dialog>
+<?php endif; ?>
 
 <div id="toast" role="status" aria-live="polite"></div>
 <script>

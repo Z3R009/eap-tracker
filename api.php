@@ -267,6 +267,44 @@ try {
             log_action('column_edited', "$label (tab $fundId)");
             json_out(['ok' => true]);
 
+        case 'new_year':
+            if (!is_admin()) {
+                throw new ApiError('Only an admin can start a new year.');
+            }
+            $year = (int)($in['year'] ?? 0);
+            $monthly = round((float)($in['monthly_amount'] ?? 0), 2);
+            $mand = round((float)($in['mandatory_amount'] ?? 0), 2);
+            if ($year < 2000 || $year > 2100) {
+                throw new ApiError('Enter a year between 2000 and 2100.');
+            }
+            if ($monthly <= 0 || $mand <= 0) {
+                throw new ApiError('Enter an amount greater than zero for both tabs.');
+            }
+            $names = [(string)$year, $year . ' Mandatory'];
+            $chk = $pdo->prepare('SELECT COUNT(*) FROM funds WHERE name IN (?, ?)');
+            $chk->execute($names);
+            if ($chk->fetchColumn()) {
+                throw new ApiError("The tabs for $year already exist.");
+            }
+            $pdo->beginTransaction();
+            try {
+                $sort = (int)$pdo->query('SELECT COALESCE(MAX(sort_no), 0) FROM funds')->fetchColumn();
+                $ins = $pdo->prepare('INSERT INTO funds (name, default_amount, sort_no) VALUES (?, ?, ?)');
+                $ins->execute([$names[0], $monthly, $sort + 1]);
+                $newFund = (int)$pdo->lastInsertId();
+                $ins->execute([$names[1], $mand, $sort + 2]);
+                $pi = $pdo->prepare('INSERT INTO periods (fund_id, label, due_on, sort_no) VALUES (?, ?, ?, ?)');
+                foreach (['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $i => $m) {
+                    $pi->execute([$newFund, $m, sprintf('%04d-%02d-01', $year, $i + 1), $i + 1]);
+                }
+                $pdo->commit();
+            } catch (Throwable $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
+            log_action('new_year', "Created the tabs for $year");
+            json_out(['ok' => true, 'fund_id' => $newFund]);
+
         case 'add_employee':
             $name = trim(preg_replace('/\s+/', ' ', (string)($in['name'] ?? '')));
             $division = strtoupper(trim((string)($in['division'] ?? '')));
