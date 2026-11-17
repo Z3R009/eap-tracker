@@ -83,3 +83,28 @@ Roles: staff can record, collect, remit and add employees. Admins can also manag
 - Back up the database regularly: `mysqldump -u root -p eap_tracker > backup.sql`.
 - Change `debug` to `false` in `config.php` (it already is) for everyday use.
 - `inc/` and `tools/` carry an `.htaccess` that blocks direct web access on Apache.
+
+## Public page (no sign in)
+
+`view.php` is a page anyone with the link can open. An employee types their name, picks it from
+the short list, and sees their own colored boxes for every tab, read only. Signing in is not needed.
+
+- Share this link: `http://your-server/eap-tracker/` also lands there when nobody is signed in.
+- **Staff sign in** is a small link in the top right corner. Staff who are signed in see **Open the ledger** instead.
+  The staff menu has a **Public page** link that opens it in a new tab so you can copy the address.
+- It shows only the person's own boxes (amount, color, collection date, exempt or paid another way). It never shows
+  notes, remarks, other people, collection totals or remittances.
+- Each visitor is limited to 60 searches a minute. Wrong access codes are limited to 8 tries in 10 minutes.
+- The page asks search engines not to list it.
+
+Optional settings, added inside `config.php` before the last `];` (the page works without them):
+
+```php
+    'public_view' => true,   // false turns the public page off completely
+    'public_code' => '',     // set a word or number to make visitors enter it once
+    'public_help' => 'If something looks wrong, tell the collector.',
+```
+
+After you change `config.php`, PHP can take a couple of seconds to notice. The first time the public page is used it
+creates a small table called `public_hits` for the rate limit, so the database user needs permission to create tables
+(the default XAMPP root user has it).

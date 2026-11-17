@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 12, 2026 at 03:07 AM
+-- Generation Time: Nov 17, 2026 at 08:53 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -168,7 +168,68 @@ INSERT INTO `audit_log` (`id`, `user_id`, `action`, `detail`, `created_at`) VALU
 (126, 1, 'payment_added', 'Toledo, Sarah Jane T., Lariba: ₱100 cash', '2026-11-12 09:37:41'),
 (127, 1, 'payment_added', 'Toledo, Sarah Jane T., Talino: ₱100 cash', '2026-11-12 09:37:42'),
 (128, 1, 'payment_added', 'Toledo, Sarah Jane T., Hautea: ₱100 cash', '2026-11-12 09:37:43'),
-(129, 1, 'payment_added', 'Toledo, Sarah Jane T., RABAYA: ₱100 cash', '2026-11-12 09:37:43');
+(129, 1, 'payment_added', 'Toledo, Sarah Jane T., RABAYA: ₱100 cash', '2026-11-12 09:37:43'),
+(130, 1, 'login', 'admin', '2026-11-12 14:46:05'),
+(131, 1, 'payment_added', 'Cabarrubias, Rosario, RABAYA: ₱100 cash', '2026-11-12 14:48:29'),
+(132, 1, 'column_edited', 'Rabaya (tab 2)', '2026-11-12 14:51:22'),
+(133, 1, 'login', 'admin', '2026-11-12 15:40:17'),
+(134, 1, 'login', 'admin', '2026-11-12 15:40:37'),
+(135, 1, 'collection_created', 'Collection #15 on 2026-11-12 (tab 1)', '2026-11-12 15:43:15'),
+(136, 1, 'payment_added', 'Lubaton, Jinnard, Lariba: ₱100 cash', '2026-11-12 15:50:26'),
+(137, 1, 'login', 'admin', '2026-11-12 16:20:22'),
+(138, 1, 'collection_deleted', 'Collection #15 on 2026-11-12', '2026-11-12 16:21:06'),
+(139, 1, 'login', 'admin', '2026-11-16 15:43:42'),
+(140, 1, 'login', 'admin', '2026-11-16 15:50:18'),
+(141, 1, 'collection_created', 'Collection #16 on 2026-11-16 (tab 2)', '2026-11-16 15:53:59'),
+(142, 1, 'payment_added', 'Vilbar, Ma. Christine B., Elosis: ₱100 cash', '2026-11-16 15:54:06'),
+(143, 1, 'payment_added', 'Vilbar, Ma. Christine B., Urbano: ₱100 cash', '2026-11-16 15:54:07'),
+(144, 1, 'payment_added', 'Vilbar, Ma. Christine B., Cipriano: ₱100 cash', '2026-11-16 15:54:09'),
+(145, 1, 'payment_added', 'Vilbar, Ma. Christine B., Lariba: ₱100 cash', '2026-11-16 15:54:09'),
+(146, 1, 'payment_added', 'Vilbar, Ma. Christine B., Talino: ₱100 cash', '2026-11-16 15:54:10'),
+(147, 1, 'payment_added', 'Vilbar, Ma. Christine B., Hautea: ₱100 cash', '2026-11-16 15:54:11'),
+(148, 1, 'payment_added', 'Vilbar, Ma. Christine B., Rabaya: ₱100 cash', '2026-11-16 15:54:12'),
+(149, 1, 'payment_added', 'Ortiz, Izzy Kate S., Lariba: ₱100 cash', '2026-11-16 15:54:20'),
+(150, 1, 'payment_added', 'Ortiz, Izzy Kate S., Talino: ₱100 cash', '2026-11-16 15:54:21'),
+(151, 1, 'payment_added', 'Salvador, Imelda T, Rabaya: ₱100 cash', '2026-11-16 15:55:03'),
+(152, 1, 'payment_added', 'Ferolino, Elaine Nita L., Hautea: ₱100 cash', '2026-11-16 15:56:28'),
+(153, 1, 'payment_updated', 'Ferolino, Elaine Nita L., Hautea: ₱100 cash', '2026-11-16 15:56:32'),
+(154, 1, 'payment_added', 'Ferolino, Elaine Nita L., Rabaya: ₱100 cash', '2026-11-16 15:56:34'),
+(155, 1, 'payment_added', 'Monsale, Karl Francis, Cipriano: ₱100 cash', '2026-11-16 15:57:54'),
+(156, 1, 'payment_added', 'Monsale, Karl Francis, Lariba: ₱100 cash', '2026-11-16 15:57:56'),
+(157, 1, 'payment_added', 'Monsale, Karl Francis, Talino: ₱100 cash', '2026-11-16 15:57:57'),
+(158, 1, 'payment_added', 'Monsale, Karl Francis, Hautea: ₱100 cash', '2026-11-16 15:57:58'),
+(159, 1, 'payment_added', 'Monsale, Karl Francis, Rabaya: ₱100 cash', '2026-11-16 15:57:59'),
+(160, 1, 'payment_added', 'Boston, Marlon Andrew B., Rabaya: ₱100 cash', '2026-11-16 15:59:21'),
+(161, 1, 'payment_added', 'Quiriones, Joven S, Hautea: ₱100 cash', '2026-11-16 16:03:15'),
+(162, 1, 'payment_deleted', 'Quiriones, Joven S, Hautea: ₱100', '2026-11-16 16:03:22'),
+(163, 1, 'payment_added', 'Quiriones, Joven S, Hautea: ₱100 cash', '2026-11-16 16:03:39'),
+(164, 1, 'payment_added', 'Quiriones, Joven S, Rabaya: ₱100 cash', '2026-11-16 16:03:40'),
+(165, 1, 'payment_added', 'Lubaton, Naye Joy A., Rabaya: ₱100 cash', '2026-11-16 16:05:01'),
+(166, 1, 'payment_added', 'Lubaton, Jinnard, Talino: ₱100 cash', '2026-11-16 16:06:26'),
+(167, 1, 'payment_added', 'Lubaton, Jinnard, Hautea: ₱100 cash', '2026-11-16 16:06:28'),
+(168, 1, 'payment_added', 'Lubaton, Jinnard, Rabaya: ₱100 cash', '2026-11-16 16:06:29'),
+(169, 1, 'payment_added', 'Morala, Niel Anthony T., Cipriano: ₱100 cash', '2026-11-16 16:08:28'),
+(170, 1, 'payment_added', 'Morala, Niel Anthony T., Lariba: ₱100 cash', '2026-11-16 16:08:29'),
+(171, 1, 'payment_added', 'Morala, Niel Anthony T., Talino: ₱100 cash', '2026-11-16 16:08:30'),
+(172, 1, 'payment_added', 'Morala, Niel Anthony T., Hautea: ₱100 cash', '2026-11-16 16:08:31'),
+(173, 1, 'payment_added', 'Morala, Niel Anthony T., Rabaya: ₱100 cash', '2026-11-16 16:08:32'),
+(174, 1, 'login', 'admin', '2026-11-16 16:12:28'),
+(175, 1, 'payment_added', 'Bercades, Aiza Marie P., Lariba: ₱100 fund_transfer', '2026-11-16 16:12:34'),
+(176, 1, 'payment_added', 'Bercades, Aiza Marie P., Talino: ₱100 fund_transfer', '2026-11-16 16:12:38'),
+(177, 1, 'payment_added', 'Bercades, Aiza Marie P., Hautea: ₱100 fund_transfer', '2026-11-16 16:12:41'),
+(178, 1, 'payment_added', 'Bercades, Aiza Marie P., Rabaya: ₱100 fund_transfer', '2026-11-16 16:12:57'),
+(179, 1, 'payment_added', 'Manalo, Elliza C., Elosis: ₱100 fund_transfer', '2026-11-16 16:13:19'),
+(180, 1, 'payment_added', 'Manalo, Elliza C., Cipriano: ₱100 fund_transfer', '2026-11-16 16:13:23'),
+(181, 1, 'payment_added', 'Manalo, Elliza C., Hautea: ₱100 fund_transfer', '2026-11-16 16:13:30'),
+(182, 1, 'payment_added', 'Manalo, Elliza C., Rabaya: ₱100 fund_transfer', '2026-11-16 16:13:33'),
+(183, 1, 'employee_updated', 'Quiriones, Joven S', '2026-11-16 16:14:30'),
+(184, 1, 'login', 'admin', '2026-11-16 16:15:35'),
+(185, 1, 'payment_added', 'Barnachea, Connie M., Urbano: ₱100 cash', '2026-11-16 16:19:42'),
+(186, 1, 'payment_added', 'Barnachea, Connie M., Cipriano: ₱100 cash', '2026-11-16 16:19:43'),
+(187, 1, 'payment_added', 'Barnachea, Connie M., Lariba: ₱100 cash', '2026-11-16 16:19:44'),
+(188, 1, 'payment_added', 'Barnachea, Connie M., Talino: ₱100 cash', '2026-11-16 16:19:45'),
+(189, 1, 'payment_added', 'Barnachea, Connie M., Hautea: ₱100 cash', '2026-11-16 16:19:46'),
+(190, 1, 'payment_added', 'Barnachea, Connie M., Rabaya: ₱100 cash', '2026-11-16 16:19:47');
 
 -- --------------------------------------------------------
 
@@ -202,7 +263,8 @@ INSERT INTO `collections` (`id`, `fund_id`, `collected_on`, `color`, `note`, `cr
 (9, 2, '2026-09-10', '#1D9E75', NULL, NULL, '2026-11-04 13:27:40'),
 (10, 1, '2026-11-04', '#7F77DD', NULL, 1, '2026-11-04 14:13:07'),
 (11, 2, '2026-11-04', '#7F77DD', NULL, 1, '2026-11-04 14:15:39'),
-(14, 2, '2026-11-12', '#378ADD', NULL, 1, '2026-11-12 08:45:36');
+(14, 2, '2026-11-12', '#378ADD', NULL, 1, '2026-11-12 08:45:36'),
+(16, 2, '2026-11-16', '#D4537E', NULL, 1, '2026-11-16 15:53:59');
 
 -- --------------------------------------------------------
 
@@ -256,7 +318,7 @@ INSERT INTO `employees` (`id`, `name`, `division`, `status`, `start_on`, `remark
 (28, 'Morala, Niel Anthony T.', 'AFMD', 'enrolled', NULL, NULL, 1, '2026-11-04 13:27:40'),
 (29, 'Morales, Mary Ann', 'MSSD', 'enrolled', NULL, NULL, 1, '2026-11-04 13:27:40'),
 (30, 'Nantes, Waren Jay B.', 'CPD', 'enrolled', NULL, NULL, 1, '2026-11-04 13:27:40'),
-(31, 'Quiriones, Joven S', 'MSSD', 'scholarship', NULL, NULL, 1, '2026-11-04 13:27:40'),
+(31, 'Quiriones, Joven S', 'MSSD', 'enrolled', NULL, NULL, 1, '2026-11-04 13:27:40'),
 (32, 'Salvador, Imelda T', 'IDD', 'enrolled', NULL, NULL, 1, '2026-11-04 13:27:40'),
 (33, 'Sucgang, Charley Jay', 'AFMD', 'enrolled', NULL, NULL, 1, '2026-11-04 13:27:40'),
 (34, 'Sucol, Mildred T.', 'AFMD', 'enrolled', NULL, NULL, 1, '2026-11-04 13:27:40'),
@@ -811,7 +873,52 @@ INSERT INTO `payments` (`id`, `employee_id`, `period_id`, `collection_id`, `amou
 (488, 36, 16, 14, 100.00, 'cash', NULL, 1, '2026-11-12 09:37:41', '2026-11-12 09:37:41'),
 (489, 36, 17, 14, 100.00, 'cash', NULL, 1, '2026-11-12 09:37:42', '2026-11-12 09:37:42'),
 (490, 36, 18, 14, 100.00, 'cash', NULL, 1, '2026-11-12 09:37:43', '2026-11-12 09:37:43'),
-(491, 36, 19, 14, 100.00, 'cash', NULL, 1, '2026-11-12 09:37:43', '2026-11-12 09:37:43');
+(491, 36, 19, 14, 100.00, 'cash', NULL, 1, '2026-11-12 09:37:43', '2026-11-12 09:37:43'),
+(492, 8, 19, 14, 100.00, 'cash', NULL, 1, '2026-11-12 14:48:29', '2026-11-12 14:48:29'),
+(493, 21, 16, 14, 100.00, 'cash', NULL, 1, '2026-11-12 15:50:26', '2026-11-12 15:50:26'),
+(494, 37, 13, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:54:06', '2026-11-16 15:54:06'),
+(495, 37, 14, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:54:07', '2026-11-16 15:54:07'),
+(496, 37, 15, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:54:09', '2026-11-16 15:54:09'),
+(497, 37, 16, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:54:09', '2026-11-16 15:54:09'),
+(498, 37, 17, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:54:10', '2026-11-16 15:54:10'),
+(499, 37, 18, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:54:11', '2026-11-16 15:54:11'),
+(500, 37, 19, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:54:12', '2026-11-16 15:54:12'),
+(501, 46, 16, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:54:20', '2026-11-16 15:54:20'),
+(502, 46, 17, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:54:21', '2026-11-16 15:54:21'),
+(503, 32, 19, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:55:03', '2026-11-16 15:55:03'),
+(504, 40, 18, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:56:28', '2026-11-16 15:56:28'),
+(505, 40, 19, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:56:34', '2026-11-16 15:56:34'),
+(506, 27, 15, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:57:54', '2026-11-16 15:57:54'),
+(507, 27, 16, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:57:56', '2026-11-16 15:57:56'),
+(508, 27, 17, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:57:57', '2026-11-16 15:57:57'),
+(509, 27, 18, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:57:58', '2026-11-16 15:57:58'),
+(510, 27, 19, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:57:59', '2026-11-16 15:57:59'),
+(511, 6, 19, 16, 100.00, 'cash', NULL, 1, '2026-11-16 15:59:21', '2026-11-16 15:59:21'),
+(513, 31, 18, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:03:39', '2026-11-16 16:03:39'),
+(514, 31, 19, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:03:40', '2026-11-16 16:03:40'),
+(515, 22, 19, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:05:01', '2026-11-16 16:05:01'),
+(516, 21, 17, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:06:26', '2026-11-16 16:06:26'),
+(517, 21, 18, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:06:28', '2026-11-16 16:06:28'),
+(518, 21, 19, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:06:29', '2026-11-16 16:06:29'),
+(519, 28, 15, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:08:28', '2026-11-16 16:08:28'),
+(520, 28, 16, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:08:29', '2026-11-16 16:08:29'),
+(521, 28, 17, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:08:30', '2026-11-16 16:08:30'),
+(522, 28, 18, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:08:31', '2026-11-16 16:08:31'),
+(523, 28, 19, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:08:32', '2026-11-16 16:08:32'),
+(524, 5, 16, 16, 100.00, 'fund_transfer', NULL, 1, '2026-11-16 16:12:34', '2026-11-16 16:12:34'),
+(525, 5, 17, 16, 100.00, 'fund_transfer', NULL, 1, '2026-11-16 16:12:38', '2026-11-16 16:12:38'),
+(526, 5, 18, 16, 100.00, 'fund_transfer', NULL, 1, '2026-11-16 16:12:41', '2026-11-16 16:12:41'),
+(527, 5, 19, 16, 100.00, 'fund_transfer', NULL, 1, '2026-11-16 16:12:57', '2026-11-16 16:12:57'),
+(528, 23, 13, 16, 100.00, 'fund_transfer', NULL, 1, '2026-11-16 16:13:19', '2026-11-16 16:13:19'),
+(529, 23, 15, 16, 100.00, 'fund_transfer', NULL, 1, '2026-11-16 16:13:23', '2026-11-16 16:13:23'),
+(530, 23, 18, 16, 100.00, 'fund_transfer', NULL, 1, '2026-11-16 16:13:30', '2026-11-16 16:13:30'),
+(531, 23, 19, 16, 100.00, 'fund_transfer', NULL, 1, '2026-11-16 16:13:33', '2026-11-16 16:13:33'),
+(532, 3, 14, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:19:42', '2026-11-16 16:19:42'),
+(533, 3, 15, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:19:43', '2026-11-16 16:19:43'),
+(534, 3, 16, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:19:44', '2026-11-16 16:19:44'),
+(535, 3, 17, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:19:45', '2026-11-16 16:19:45'),
+(536, 3, 18, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:19:46', '2026-11-16 16:19:46'),
+(537, 3, 19, 16, 100.00, 'cash', NULL, 1, '2026-11-16 16:19:47', '2026-11-16 16:19:47');
 
 -- --------------------------------------------------------
 
@@ -851,7 +958,7 @@ INSERT INTO `periods` (`id`, `fund_id`, `label`, `due_on`, `beneficiary_id`, `so
 (16, 2, 'Lariba', NULL, 44, 4),
 (17, 2, 'Talino', NULL, NULL, 5),
 (18, 2, 'Hautea', NULL, 17, 6),
-(19, 2, 'RABAYA', NULL, NULL, 7);
+(19, 2, 'Rabaya', NULL, NULL, 7);
 
 -- --------------------------------------------------------
 
@@ -975,13 +1082,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=191;
 
 --
 -- AUTO_INCREMENT for table `collections`
 --
 ALTER TABLE `collections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `employees`
@@ -999,7 +1106,7 @@ ALTER TABLE `funds`
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=492;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=538;
 
 --
 -- AUTO_INCREMENT for table `periods`

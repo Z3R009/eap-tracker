@@ -3,7 +3,9 @@
 declare(strict_types=1);
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/ledger.php';
-require_login();
+if (!current_user()) {
+  redirect(cfg('public_view') === false ? 'login.php' : 'view.php');
+}
 
 $funds = funds_list();
 if (!$funds) {

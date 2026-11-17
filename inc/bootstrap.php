@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 $GLOBALS['cfg'] = require __DIR__ . '/../config.php';
@@ -130,9 +131,12 @@ function page_header(string $title, string $active = ''): void
             $links['users'] = ['users.php', 'Users'];
             $links['audit'] = ['audit.php', 'History'];
         }
+        if (cfg('public_view') !== false) {
+            $links['public'] = ['view.php', 'Public page'];
+        }
         echo '<header class="top"><a class="brand" href="index.php">' . $app . '</a><nav>';
         foreach ($links as $key => [$href, $label]) {
-            echo '<a href="' . $href . '"' . ($key === $active ? ' aria-current="page"' : '') . '>' . $label . '</a>';
+            echo '<a href="' . $href . '"' . ($key === $active ? ' aria-current="page"' : '') . ($key === 'public' ? ' target="_blank" rel="noopener"' : '') . '>' . $label . '</a>';
         }
         echo '</nav><form method="post" action="login.php" class="who"><span>' . h($u['full_name']) . '</span>';
         echo '<input type="hidden" name="csrf" value="' . h(csrf_token()) . '">';
