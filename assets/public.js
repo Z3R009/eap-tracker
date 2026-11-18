@@ -42,9 +42,8 @@
   }
 
   function fundBlock(f) {
-    const head = '<thead><tr>' + f.cells.map(c => '<th>' + esc(c.label) + '</th>').join('') + '<th class="tot">Total</th></tr></thead>';
-    const body = '<tbody><tr>' + f.cells.map(cell).join('') + '<td class="tot">' + (f.total ? num(f.total) : '-') + '</td></tr></tbody>';
-    const chips = f.legend.map(l => '<button type="button" class="chip" data-d="' + esc(l.date) + '"><span class="swatch on" style="--h:' + esc(l.color) + '"></span>' + esc(dateFmt(l.date)) + '</button>').join('');
+        const head = '<thead><tr>' + f.cells.map(c => '<th>' + esc(c.label) + '</th>').join('') + '</tr></thead>';
+    const body = '<tbody><tr>' + f.cells.map(cell).join('') + '</tr></tbody>';nst chips = f.legend.map(l => '<button type="button" class="chip" data-d="' + esc(l.date) + '"><span class="swatch on" style="--h:' + esc(l.color) + '"></span>' + esc(dateFmt(l.date)) + '</button>').join('');
     return '<section class="fundblock"><h2>' + esc(f.name) + '</h2>' +
       '<div class="gridwrap pubwrap"><table class="grid pubgrid">' + head + body + '</table></div>' +
       (chips ? '<div class="chips" aria-label="Collection dates">' + chips + '</div>' : '') + '</section>';
@@ -54,7 +53,7 @@
     const e = d.employee;
     let h = '<div class="recordhead"><h2>' + esc(e.name) + '</h2>' + (e.division ? '<span class="muted">' + esc(e.division) + '</span>' : '') + '</div>';
     if (STATUS[e.status]) h += '<p class="muted" style="margin:0">' + esc(STATUS[e.status]) + '</p>';
-    h += '<p class="keyline"><span>Colored box: paid, the color is the collection date</span><span>Dashed box: not paid yet</span><span>Gray box: exempt or paid another way</span><span>FT: fund transfer</span></p>';
+    h += '<p class="keyline"><span>Colored box: paid, the color is the collection date</span><span>pan><span>Gray box: exempt or paid another way</span><span>FT: fund transfer</span></p>';
     h += d.funds.length ? d.funds.map(fundBlock).join('') : '<p class="muted">There is nothing to show for you yet.</p>';
     h += '<p class="pubfoot">' + (d.updated ? 'Records updated ' + esc(dateFmt(d.updated)) + '. ' : '') + '<button type="button" class="link" id="again">Search for another name</button></p>';
     $('#record').innerHTML = h;
