@@ -30,8 +30,7 @@
 
   function cell(c) {
     switch (c.state) {
-      case 'paid':
-               return '<td class="c p m-' + esc(c.mode) + '" data-d="' + esc(c.date) + '" style="--h:' + esc(c.color) + '" title="Paid ' + esc(dateFmt(c.date)) + '">Paid</td>';
+      case 'paid': return '<td class="c p m-' + esc(c.mode) + '" data-d="' + esc(c.date) + '" style="--h:' + esc(c.color) + '" title="Paid ' + esc(dateFmt(c.date)) + '">Paid</td>';
       case 'exempt': return '<td class="c x" title="Exempt">Exempt</td>';
       case 'direct': return '<td class="c x" title="Paid directly">Direct</td>';
       case 'care_of': return '<td class="c x" title="Paid care of another office">c/o</td>';
@@ -42,7 +41,7 @@
   }
 
   function fundBlock(f) {
-        const head = '<thead><tr>' + f.cells.map(c => '<th>' + esc(c.label) + '</th>').join('') + '</tr></thead>';
+    const head = '<thead><tr>' + f.cells.map(c => '<th>' + esc(c.label) + '</th>').join('') + '</tr></thead>';
     const body = '<tbody><tr>' + f.cells.map(cell).join('') + '</tr></tbody>';
     const chips = f.legend.map(l => '<button type="button" class="chip" data-d="' + esc(l.date) + '"><span class="swatch on" style="--h:' + esc(l.color) + '"></span>' + esc(dateFmt(l.date)) + '</button>').join('');
     return '<section class="fundblock"><h2>' + esc(f.name) + '</h2>' +
