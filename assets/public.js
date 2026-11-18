@@ -31,7 +31,7 @@
   function cell(c) {
     switch (c.state) {
       case 'paid':
-        return '<td class="c p m-' + esc(c.mode) + '" data-d="' + esc(c.date) + '" style="--h:' + esc(c.color) + '" title="Paid ' + esc(dateFmt(c.date)) + '">' + num(c.amount) + '</td>';
+               return '<td class="c p m-' + esc(c.mode) + '" data-d="' + esc(c.date) + '" style="--h:' + esc(c.color) + '" title="Paid ' + esc(dateFmt(c.date)) + '">Paid</td>';
       case 'exempt': return '<td class="c x" title="Exempt">Exempt</td>';
       case 'direct': return '<td class="c x" title="Paid directly">Direct</td>';
       case 'care_of': return '<td class="c x" title="Paid care of another office">c/o</td>';
