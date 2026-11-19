@@ -196,3 +196,59 @@ function add_remittance(int $collectionId, string $date, float $amount, string $
         ->execute([$collectionId, $date, $amount, $mode, trim($reference) ?: null, $uid ?: null]);
     log_action('remitted', "Collection #$collectionId: " . money($amount) . " $mode on $date");
 }
+
+
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** Adds the columns that "Add tab" needs to the funds table the first time they are used. */
+function ensure_tab_columns(): void
+{
+    $pdo = db();
+    if ($pdo->query("SHOW COLUMNS FROM funds LIKE 'repeat_yearly'")->fetch()) {
+        return;
+    }
+    try {
+        $pdo->exec("ALTER TABLE funds
+            ADD COLUMN label VARCHAR(60) NULL AFTER name,
+            ADD COLUMN year SMALLINT NULL AFTER label,
+            ADD COLUMN kind ENUM('months','cases') NOT NULL DEFAULT 'cases' AFTER year,
+            ADD COLUMN repeat_yearly TINYINT(1) NOT NULL DEFAULT 0 AFTER kind");
+    } catch (PDOException $e) {
+        error_log('EAP tracker ensure_tab_columns: ' . $e->getMessage());
+        throw new ApiError('The database needs a small update first. Run migrate_tabs.sql once, then try again.');
+    }
+}
+
+/** Creates the new year's copy of every tab that was marked "repeat every year". Returns how many were made. */
+function copy_yearly_tabs(int $year, int $sort): int
+{
+    $pdo = db();
+    $rows = $pdo->query(
+        'SELECT f.label, f.default_amount, f.kind
+         FROM funds f
+         JOIN (SELECT label, MAX(year) AS y FROM funds
+               WHERE repeat_yearly = 1 AND label IS NOT NULL AND year IS NOT NULL AND year < ' . (int)$year . '
+               GROUP BY label) m ON m.label = f.label AND m.y = f.year
+         WHERE f.repeat_yearly = 1'
+    )->fetchAll();
+    $exists = $pdo->prepare('SELECT COUNT(*) FROM funds WHERE name = ?');
+    $ins = $pdo->prepare('INSERT INTO funds (name, label, year, kind, repeat_yearly, default_amount, sort_no) VALUES (?, ?, ?, ?, 1, ?, ?)');
+    $pi = $pdo->prepare('INSERT INTO periods (fund_id, label, due_on, sort_no) VALUES (?, ?, ?, ?)');
+    $made = 0;
+    foreach ($rows as $r) {
+        $name = $year . ' ' . $r['label'];
+        $exists->execute([$name]);
+        if ($exists->fetchColumn()) {
+            continue;
+        }
+        $ins->execute([$name, $r['label'], $year, $r['kind'], $r['default_amount'], ++$sort]);
+        if ($r['kind'] === 'months') {
+            $fid = (int)$pdo->lastInsertId();
+            foreach (MONTH_LABELS as $i => $m) {
+                $pi->execute([$fid, $m, sprintf('%04d-%02d-01', $year, $i + 1), $i + 1]);
+            }
+        }
+        $made++;
+    }
+    return $made;
+}

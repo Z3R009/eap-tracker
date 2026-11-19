@@ -398,6 +398,25 @@
       });
     }
 
+    const at = $('#btnAddTab');
+    if (at) {
+      const tf = $('#tabForm');
+      const preview = () => {
+        const l = tf.elements.label.value.trim(), y = tf.elements.year.value.trim();
+        $('#tabPreview').textContent = l ? 'The tab will be named: ' + (y ? y + ' ' : '') + l : '';
+      };
+      tf.addEventListener('input', preview);
+      tf.addEventListener('change', preview);
+      at.addEventListener('click', () => { tf.reset(); $('#tabErr').textContent = ''; preview(); $('#tabDlg').showModal(); });
+      tf.addEventListener('submit', async ev => {
+        ev.preventDefault();
+        try {
+          const r = await api('add_tab', {label: tf.elements.label.value, year: +tf.elements.year.value || 0, amount: parseFloat(tf.elements.amount.value), columns: tf.elements.columns.value, repeat: tf.elements.repeat.checked});
+          location.href = 'index.php?fund=' + r.fund_id;
+        } catch (err) { $('#tabErr').textContent = err.message; }
+      });
+    }
+
     $('#btnAddEmp').addEventListener('click', () => { $('#empForm').reset(); $('#empErr').textContent = ''; $('#empDlg').showModal(); });
     $('#empForm').addEventListener('submit', async ev => {
       ev.preventDefault();

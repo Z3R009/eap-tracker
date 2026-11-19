@@ -170,7 +170,7 @@ td.c { -webkit-touch-callout: none; touch-action: manipulation; }
   label.inline select { flex: 1; min-width: 0; }
   .toolbar .spacer { display: none; }
   #search { flex: 1 1 100%; min-width: 0; }
-  #btnAddPeriod, #btnAddEmp, #btnNewYear { flex: 1 1 calc(50% - 4px); }
+  #btnAddPeriod, #btnAddEmp, #btnNewYear, #btnAddTab { flex: 1 1 calc(50% - 4px); }
 
   .gridwrap { max-height: 72vh; }
   .grid th { padding: 10px 2px; }

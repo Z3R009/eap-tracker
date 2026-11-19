@@ -57,7 +57,7 @@ page_header('Ledger', 'ledger');
     <input type="search" id="search" placeholder="Find an employee" aria-label="Find an employee">
     <button id="btnAddPeriod">Add column</button>
     <button id="btnAddEmp">Add employee</button>
-    <?php if (is_admin()): ?><button id="btnNewYear">New year</button><?php endif; ?>
+    <?php if (is_admin()): ?><button id="btnNewYear">New year</button><button id="btnAddTab">Add tab</button><?php endif; ?>
   </section>
 
   <div class="gridwrap">
@@ -161,6 +161,27 @@ page_header('Ledger', 'ledger');
       <label>Usual Mandatory amount per person <input type="number" name="mandatory_amount" step="0.01" min="0.01" value="<?= h($mandatoryAmt) ?>" required></label>
       <p class="err" id="yearErr" role="alert"></p>
       <div class="actions"><span class="spacer"></span><button type="button" data-close>Cancel</button><button class="primary">Create tabs</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="tabDlg">
+    <form id="tabForm" class="stack">
+      <h3>Add a tab</h3>
+      <p class="muted">A new page in the ledger, such as a fund or a one-time collection. Your employee list is shared.</p>
+      <label>Tab name <input name="label" maxlength="50" required placeholder="Christmas fund"></label>
+      <label>Year <input type="number" name="year" min="2000" max="2100" placeholder="Optional"></label>
+      <p class="hint" id="tabPreview"></p>
+      <label>Usual amount per person <input type="number" name="amount" step="0.01" min="0.01" required></label>
+      <label>Columns
+        <select name="columns">
+          <option value="none">None yet, I will add them as needed</option>
+          <option value="months">Jan to Dec of the year above</option>
+        </select>
+      </label>
+      <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="repeat"> Add this tab again every year when I press New year</label>
+      <p class="hint">Repeating and Jan to Dec both need a year. The next year's copy keeps the same name, amount and column type.</p>
+      <p class="err" id="tabErr" role="alert"></p>
+      <div class="actions"><span class="spacer"></span><button type="button" data-close>Cancel</button><button class="primary">Create tab</button></div>
     </form>
   </dialog>
 <?php endif; ?>

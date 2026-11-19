@@ -286,6 +286,12 @@ try {
             if ($chk->fetchColumn()) {
                 throw new ApiError("The tabs for $year already exist.");
             }
+            $repeatOk = true;
+            try {
+                ensure_tab_columns();
+            } catch (ApiError $e) {
+                $repeatOk = false;
+            }
             $pdo->beginTransaction();
             try {
                 $sort = (int)$pdo->query('SELECT COALESCE(MAX(sort_no), 0) FROM funds')->fetchColumn();
@@ -297,12 +303,66 @@ try {
                 foreach (['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as $i => $m) {
                     $pi->execute([$newFund, $m, sprintf('%04d-%02d-01', $year, $i + 1), $i + 1]);
                 }
+                if ($repeatOk) {
+                    copy_yearly_tabs($year, $sort + 2);
+                }
                 $pdo->commit();
             } catch (Throwable $e) {
                 $pdo->rollBack();
                 throw $e;
             }
             log_action('new_year', "Created the tabs for $year");
+            json_out(['ok' => true, 'fund_id' => $newFund]);
+
+        case 'add_tab':
+            if (!is_admin()) {
+                throw new ApiError('Only an admin can add a tab.');
+            }
+            ensure_tab_columns();
+            $label = trim((string)preg_replace('/\s+/', ' ', (string)($in['label'] ?? '')));
+            $year = (int)($in['year'] ?? 0);
+            $amount = round((float)($in['amount'] ?? 0), 2);
+            $kind = ($in['columns'] ?? 'none') === 'months' ? 'months' : 'cases';
+            $repeat = !empty($in['repeat']) ? 1 : 0;
+            if ($label === '' || mb_strlen($label) > 50) {
+                throw new ApiError('Enter a tab name of up to 50 characters.');
+            }
+            if ($year !== 0 && ($year < 2000 || $year > 2100)) {
+                throw new ApiError('Enter a year between 2000 and 2100, or leave it empty.');
+            }
+            if ($amount <= 0) {
+                throw new ApiError('Enter an amount greater than zero.');
+            }
+            if ($kind === 'months' && !$year) {
+                throw new ApiError('Jan to Dec columns need a year.');
+            }
+            if ($repeat && !$year) {
+                throw new ApiError('A tab that repeats every year needs a year.');
+            }
+            $name = $year ? $year . ' ' . $label : $label;
+            $chk = $pdo->prepare('SELECT COUNT(*) FROM funds WHERE name = ?');
+            $chk->execute([$name]);
+            if ($chk->fetchColumn()) {
+                throw new ApiError("A tab named \"$name\" already exists.");
+            }
+            $pdo->beginTransaction();
+            try {
+                $sort = (int)$pdo->query('SELECT COALESCE(MAX(sort_no), 0) FROM funds')->fetchColumn();
+                $pdo->prepare('INSERT INTO funds (name, label, year, kind, repeat_yearly, default_amount, sort_no) VALUES (?, ?, ?, ?, ?, ?, ?)')
+                    ->execute([$name, $label, $year ?: null, $kind, $repeat, $amount, $sort + 1]);
+                $newFund = (int)$pdo->lastInsertId();
+                if ($kind === 'months') {
+                    $pi = $pdo->prepare('INSERT INTO periods (fund_id, label, due_on, sort_no) VALUES (?, ?, ?, ?)');
+                    foreach (MONTH_LABELS as $i => $m) {
+                        $pi->execute([$newFund, $m, sprintf('%04d-%02d-01', $year, $i + 1), $i + 1]);
+                    }
+                }
+                $pdo->commit();
+            } catch (Throwable $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
+            log_action('tab_added', $name . ($repeat ? ' (repeats every year)' : ''));
             json_out(['ok' => true, 'fund_id' => $newFund]);
 
         case 'add_employee':
