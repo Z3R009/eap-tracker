@@ -19,6 +19,7 @@ function status_of(float $collected, float $remitted): string
 /** Every collection of a fund with totals, remitted amount, status and age. */
 function collections_for_fund(int $fundId): array
 {
+    ensure_releases_table();
     $pdo = db();
     $st = $pdo->prepare(
         'SELECT c.id, c.fund_id, c.collected_on, c.color, c.note, c.created_by,
@@ -34,6 +35,10 @@ function collections_for_fund(int $fundId): array
     $in = implode(',', array_map('intval', array_column($rows, 'id')));
     $rem = $pdo->query("SELECT collection_id, SUM(amount) FROM remittances WHERE collection_id IN ($in) GROUP BY collection_id")
         ->fetchAll(PDO::FETCH_KEY_PAIR);
+    $rel = [];
+    foreach ($pdo->query("SELECT collection_id, SUM(amount) AS s, MAX(released_on) AS d FROM releases WHERE collection_id IN ($in) GROUP BY collection_id") as $x) {
+        $rel[(int)$x['collection_id']] = $x;
+    }
     $today = new DateTimeImmutable('today');
     foreach ($rows as &$r) {
         $r['id'] = (int)$r['id'];
@@ -41,6 +46,10 @@ function collections_for_fund(int $fundId): array
         $r['collected'] = (float)$r['collected'];
         $r['entries'] = (int)$r['entries'];
         $r['remitted'] = (float)($rem[$r['id']] ?? 0);
+        $r['released'] = (float)($rel[$r['id']]['s'] ?? 0);
+        $r['released_on'] = $rel[$r['id']]['d'] ?? null;
+        $r['release_status'] = $r['released'] <= 0 ? 'none'
+            : (($r['released'] + 0.004) < $r['collected'] ? 'partial' : 'released');
         $r['status'] = status_of($r['collected'], $r['remitted']);
         $r['locked'] = $r['status'] === 'remitted';
         $r['age_days'] = $r['locked'] ? null
@@ -251,4 +260,46 @@ function copy_yearly_tabs(int $year, int $sort): int
         $made++;
     }
     return $made;
+}
+
+function ensure_releases_table(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    db()->exec("CREATE TABLE IF NOT EXISTS releases (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        collection_id INT NOT NULL,
+        released_on DATE NOT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        note VARCHAR(255) NULL,
+        created_by INT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_collection (collection_id),
+        FOREIGN KEY (collection_id) REFERENCES collections(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $done = true;
+}
+
+function add_release(int $collectionId, string $date, float $amount, string $note, int $uid): void
+{
+    $c = collection_by_id($collectionId);
+    if (!$c) {
+        throw new ApiError('That collection was not found.');
+    }
+    valid_date($date, 'the release');
+    $amount = round($amount, 2);
+    if ($amount <= 0) {
+        throw new ApiError('Enter the amount released.');
+    }
+    $ready = round($c['remitted'] - $c['released'], 2);
+    if ($amount > $ready + 0.004) {
+        throw new ApiError($ready > 0
+            ? 'Only ' . money($ready) . ' is remitted and waiting to be released.'
+            : 'Remit this collection first.');
+    }
+    db()->prepare('INSERT INTO releases (collection_id, released_on, amount, note, created_by) VALUES (?, ?, ?, ?, ?)')
+        ->execute([$collectionId, $date, $amount, trim($note) ?: null, $uid ?: null]);
+    log_action('released', "Collection #$collectionId: " . money($amount) . " on $date");
 }

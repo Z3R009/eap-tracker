@@ -21,9 +21,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       if (!is_admin()) {
         throw new ApiError('Only an admin can delete a remittance.');
       }
+      $cc = collection_by_id($id);
+      $amt = (float)$pdo->query('SELECT amount FROM remittances WHERE id = ' . (int)$_POST['remit_id'])->fetchColumn();
+      if ($cc && round($cc['remitted'] - $amt, 2) < round($cc['released'], 2) - 0.004) {
+        throw new ApiError('Part of this was already released. Delete the release first.');
+      }
       $pdo->prepare('DELETE FROM remittances WHERE id = ? AND collection_id = ?')->execute([(int)$_POST['remit_id'], $id]);
       log_action('remittance_deleted', "Collection #$id, remittance #" . (int)$_POST['remit_id']);
       $_SESSION['flash'] = 'Remittance deleted. The collection is open for changes again.';
+    } elseif ($do === 'delete_release') {
+      if (!is_admin()) {
+        throw new ApiError('Only an admin can delete a release.');
+      }
+      $pdo->prepare('DELETE FROM releases WHERE id = ? AND collection_id = ?')->execute([(int)$_POST['release_id'], $id]);
+      log_action('release_deleted', "Collection #$id, release #" . (int)$_POST['release_id']);
+      $_SESSION['flash'] = 'Release deleted.';
     } elseif ($do === 'note') {
       $pdo->prepare('UPDATE collections SET note = ? WHERE id = ?')->execute([trim((string)$_POST['note']) ?: null, $id]);
       $_SESSION['flash'] = 'Note saved.';
@@ -54,6 +66,9 @@ $payments = $st->fetchAll();
 $st = $pdo->prepare('SELECT r.*, u.full_name AS by_name FROM remittances r LEFT JOIN users u ON u.id = r.created_by WHERE r.collection_id = ? ORDER BY r.remitted_on, r.id');
 $st->execute([$id]);
 $remits = $st->fetchAll();
+$st = $pdo->prepare('SELECT * FROM releases WHERE collection_id = ? ORDER BY released_on, id');
+$st->execute([$id]);
+$releases = $st->fetchAll();
 $st = $pdo->prepare(
   'SELECT pr.label, b.name AS beneficiary, COUNT(*) AS n, SUM(p.amount) AS total
      FROM payments p JOIN periods pr ON pr.id = p.period_id LEFT JOIN employees b ON b.id = pr.beneficiary_id
@@ -175,6 +190,37 @@ page_header('Collection ' . fmt_date($c['collected_on']), 'ledger');
     </form>
   <?php endif; ?>
 
+
+
+  <h2>Releases</h2>
+  <table class="list">
+    <tr>
+      <th>Date</th>
+      <th class="r">Amount</th>
+      <th>Note</th>
+      <th class="noprint"></th>
+    </tr>
+    <?php foreach ($releases as $r): ?>
+      <tr>
+        <td><?= h(fmt_date($r['released_on'])) ?></td>
+        <td class="r"><?= h(money($r['amount'])) ?></td>
+        <td><?= h($r['note']) ?></td>
+        <td class="noprint"><?php if (is_admin()): ?>
+            <form method="post" onsubmit="return confirm('Delete this release?')">
+              <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+              <input type="hidden" name="id" value="<?= $id ?>">
+              <input type="hidden" name="do" value="delete_release">
+              <input type="hidden" name="release_id" value="<?= (int)$r['id'] ?>">
+              <button class="link">Delete</button>
+            </form>
+          <?php endif; ?>
+        </td>
+      </tr>
+    <?php endforeach; ?>
+    <?php if (!$releases): ?><tr>
+        <td colspan="4" class="muted">Nothing released yet.</td>
+      </tr><?php endif; ?>
+  </table>
   <h2>Payments in this collection</h2>
   <table class="list">
     <tr>

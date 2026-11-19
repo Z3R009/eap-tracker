@@ -180,6 +180,31 @@ try {
             );
             json_out(['ok' => true]);
 
+        case 'release':
+            add_release(
+                (int)($in['collection_id'] ?? 0),
+                (string)($in['released_on'] ?? ''),
+                (float)($in['amount'] ?? 0),
+                (string)($in['note'] ?? ''),
+                (int)$uid
+            );
+            json_out(['ok' => true]);
+
+        case 'set_collection_color':
+            fund_must_exist($fundId);
+            $id = (int)($in['collection_id'] ?? 0);
+            $color = strtolower(trim((string)($in['color'] ?? '')));
+            if (!preg_match('/^#[0-9a-f]{6}$/', $color)) {
+                throw new ApiError('Choose a valid color.');
+            }
+            $c = collection_by_id($id);
+            if (!$c || (int)$c['fund_id'] !== $fundId) {
+                throw new ApiError('That collection does not belong to this tab.');
+            }
+            $pdo->prepare('UPDATE collections SET color = ? WHERE id = ?')->execute([$color, $id]);
+            log_action('collection_color_changed', "Collection #$id color changed to $color");
+            json_out(['ok' => true]);
+
         case 'delete_collection':
             $id = (int)($in['collection_id'] ?? 0);
             $c = collection_by_id($id);

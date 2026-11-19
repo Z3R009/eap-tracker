@@ -1,3 +1,4 @@
+
 (function () {
   'use strict';
   const E = window.EAP;
@@ -65,11 +66,23 @@
   }
 
   function renderSummary() {
-    const c = S.collections.reduce((a, x) => a + x.collected, 0);
-    const r = S.collections.reduce((a, x) => a + x.remitted, 0);
-    const left = Math.max(c - r, 0);
+    const sum = k => S.collections.reduce((a, x) => a + x[k], 0);
+    const collected = sum('collected');
+    const toRemit = Math.max(collected - sum('remitted'), 0);
+    const released = sum('released');
+    const available = collected - released;
+    let still = 0;
+    for (const e of S.employees) {
+      for (const p of S.periods) {
+        if (!pays.get(e.id + ':' + p.id) && owes(e, p)) still += S.default_amount;
+      }
+    }
     const card = (label, v, cls) => '<div class="card ' + (cls || '') + '"><span>' + label + '</span><b>' + peso(v) + '</b></div>';
-    $('#summary').innerHTML = card('Collected', c) + card('Remitted', r) + card('Awaiting remittance', left, left > 0 ? 'hot' : '');
+    $('#summary').innerHTML = card('Collected so far', collected) +
+      card('To be remitted', toRemit, toRemit > 0 ? 'hot' : '') +
+      card('Released so far', released) +
+      card('Available balance', available) +
+      card('Still to collect', still);
   }
 
   function renderActive() {
@@ -113,7 +126,8 @@
           const col = colById.get(pay.collection_id);
           total += pay.amount;
           const tip = (col ? dateFmt(col.collected_on) : '') + ', ' + MODE[pay.mode] + (pay.note ? ', ' + pay.note : '');
-          cells += '<td class="c p m-' + pay.mode + '" ' + at + ' data-c="' + pay.collection_id + '" style="--h:' + (col ? col.color : '#888') + '" title="' + esc(tip) + '">' + num(pay.amount) + '</td>';
+          const done = col && col.release_status === 'released';
+          cells += '<td class="c p m-' + pay.mode + (done ? ' rel' : '') + '" ' + at + ' data-c="' + pay.collection_id + '" style="--h:' + (col ? col.color : '#888') + '" title="' + esc(tip + (done ? ', released' : '')) + '">' + num(pay.amount) + '</td>';
         } else if (pay) {
           const tip = MODE[pay.mode] + (pay.amount ? ': ' + peso(pay.amount) : '') + (pay.note ? ', ' + pay.note : '');
           cells += '<td class="c x" ' + at + ' title="' + esc(tip) + '">' + (pay.mode === 'care_of' ? 'c/o' : pay.mode === 'exempt' ? 'Exempt' : 'Direct') + '</td>';
@@ -127,8 +141,8 @@
       h += '<tr data-name="' + esc(e.name.toLowerCase()) + '"><td class="name"><span class="nm">' + esc(e.name) + '</span>' + tag + '</td>' +
         cells + '<td class="tot">' + (total ? num(total) : '') + '</td></tr>';
     }
-    const colTot = {}, actTot = {}, owe = {}, pend = {};
-    P.forEach(p => { colTot[p.id] = 0; actTot[p.id] = 0; owe[p.id] = 0; pend[p.id] = 0; });
+    const colTot = {}, actTot = {}, owe = {}, pend = {}, rel = {};
+    P.forEach(p => { colTot[p.id] = 0; actTot[p.id] = 0; owe[p.id] = 0; pend[p.id] = 0; rel[p.id] = 0; });
     for (const e of S.employees) {
       for (const p of P) {
         const pay = pays.get(e.id + ':' + p.id);
@@ -137,11 +151,14 @@
           if (pay.collection_id === S.active) actTot[p.id] += pay.amount;
           const cc = colById.get(pay.collection_id);
           if (cc && !cc.locked && cc.collected > 0) pend[p.id] += pay.amount * (cc.collected - cc.remitted) / cc.collected;
+          if (cc && cc.collected > 0) rel[p.id] += pay.amount * cc.released / cc.collected;
         } else if (!pay && owes(e, p)) {
           owe[p.id] += S.default_amount;
         }
       }
     }
+    const avail = {};
+    P.forEach(p => { avail[p.id] = colTot[p.id] - rel[p.id]; });
     const r2 = v => Math.round(v * 100) / 100;
     const sum = o => r2(P.reduce((a, p) => a + o[p.id], 0));
     const frow = (cls, label, o, tip, style) => '<tr class="' + cls + '"' + (style ? ' style="' + style + '"' : '') + '><td class="fs name" title="' + esc(tip) + '">' + esc(label) + '</td>' +
@@ -149,7 +166,9 @@
       '<td class="fs ftot">' + (sum(o) ? num(sum(o)) : '-') + '</td></tr>';
     const act = colById.get(S.active);
     let foot = '<tfoot>' + frow('f-col', 'Collected so far', colTot, 'Everything collected in this tab, per column') +
-      frow('f-pend', 'To be remitted', pend, 'Collected but not yet remitted, per column. A partly remitted collection is split between its columns in proportion.');
+      frow('f-pend', 'To be remitted', pend, 'Collected but not yet remitted, per column. A partly remitted collection is split between its columns in proportion.') +
+      frow('f-rel', 'Released', rel, 'Released to the names in the columns. A partly released collection is split between its columns in proportion.') +
+      frow('f-avail', 'Available balance', avail, 'Collected so far minus released so far, per column');
     if (act) {
       const d = new Date(act.collected_on + 'T00:00:00').toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
       foot += frow('f-rem', 'Collected ' + d, actTot, 'What was collected in the collection you are recording into (' + dateFmt(act.collected_on) + '), per column', '--h:' + act.color);
@@ -164,20 +183,35 @@
       $('#legend').innerHTML = '<p class="empty">No collections yet. Press Collect today when you start receiving payments.</p>';
       return;
     }
-    $('#legend').innerHTML = rows.map(c => {
-      let badge = '<span class="badge ' + c.status + '">' + STATUS[c.status] + '</span>';
+    const head = '<div class="lhead"><span>Collection</span><span>Release</span></div>';
+    $('#legend').innerHTML = head + rows.map(c => {
+      const badge = '<span class="badge ' + c.status + '">' + STATUS[c.status] + '</span>';
       let sub = '';
       if (c.status === 'partial') sub = peso(c.remitted) + ' of ' + peso(c.collected) + ' remitted';
       else if (c.status === 'open') sub = c.entries ? 'Open for ' + c.age_days + ' day' + (c.age_days === 1 ? '' : 's') : 'No payments yet';
       const late = c.status !== 'remitted' && c.age_days > 30 && c.entries ? ' late' : '';
       const del = !c.entries && !c.remitted ? '<button class="link" data-del="' + c.id + '">Delete</button>' : '';
       const rem = !c.locked && c.collected - c.remitted > 0 ? '<button data-remit="' + c.id + '">Remit</button>' : '';
+
+      const ready = Math.round((c.remitted - c.released) * 100) / 100;
+      let right;
+      if (c.remitted <= 0) {
+        right = '<small class="muted">Waiting for remittance</small>';
+      } else {
+        const rs = {none: ['open', 'To release', peso(ready) + ' ready'],
+                    partial: ['partial', 'Partial', peso(c.released) + ' of ' + peso(c.collected) + ' released'],
+                    released: ['remitted', 'Released', dateFmt(c.released_on)]}[c.release_status];
+        right = '<span class="lstat"><span class="badge ' + rs[0] + '">' + rs[1] + '</span><small>' + esc(rs[2]) + '</small></span>' +
+          (ready > 0.004 ? '<span class="lact"><button data-release="' + c.id + '">Release</button></span>' : '');
+      }
       return '<div class="lrow' + late + (c.id === pinned ? ' pinned' : '') + '" data-id="' + c.id + '" style="--h:' + c.color + '">' +
-        '<span class="swatch on"></span>' +
+        '<div class="lcol"><span class="swatch on"></span>' +
+        '<input class="date-color" type="color" value="' + esc(c.color || '#888888') + '" data-color="' + c.id + '" aria-label="Change color for ' + esc(dateFmt(c.collected_on)) + '" title="Change date color">' +
         '<a class="ldate" href="collection.php?id=' + c.id + '">' + esc(dateFmt(c.collected_on)) + '</a>' +
         '<span class="lamt">' + peso(c.collected) + '</span>' +
         '<span class="lstat">' + badge + '<small>' + esc(sub) + '</small></span>' +
-        '<span class="lact">' + rem + del + '</span></div>';
+        '<span class="lact">' + rem + del + '</span></div>' +
+        '<div class="rcol">' + right + '</div></div>';
     }).join('');
   }
 
@@ -259,6 +293,26 @@
     $('#periodSave').textContent = p ? 'Save column' : 'Add column';
     $('#periodErr').textContent = '';
     $('#periodDlg').showModal();
+  }
+
+  function openRelease(id) {
+    const c = colById.get(id);
+    const f = $('#releaseForm');
+    const ready = Math.round((c.remitted - c.released) * 100) / 100;
+    f.reset();
+    f.dataset.id = id;
+    $('#releaseTitle').textContent = 'Release ' + dateFmt(c.collected_on);
+    $('#releaseMeta').textContent = peso(c.remitted) + ' remitted, ' + peso(c.released) + ' released. ' + peso(ready) + ' to release, split by name:';
+    const by = new Map();
+    for (const p of S.payments) if (p.collection_id === id) by.set(p.period_id, (by.get(p.period_id) || 0) + p.amount);
+    const who = bid => (S.employees.find(e => e.id === bid) || {}).name;
+    $('#releaseBreak').innerHTML = S.periods.filter(p => by.has(p.id)).map(p =>
+      '<li><span>' + esc(who(p.beneficiary_id) || p.label) + '</span><b>' + peso(Math.round(by.get(p.id) * ready / c.collected * 100) / 100) + '</b></li>').join('');
+    f.elements.released_on.value = S.today;
+    f.elements.amount.value = ready;
+    f.elements.amount.max = ready;
+    $('#releaseErr').textContent = '';
+    $('#releaseDlg').showModal();
   }
 
   function openRemit(id) {
@@ -344,11 +398,31 @@
       await refresh();
     }));
 
+    // Save a chosen color for an individual collection date.
+    $('#legend').addEventListener('change', ev => {
+      const picker = ev.target.closest('[data-color]');
+      if (!picker) return;
+      run(async () => {
+        await api('set_collection_color', {
+          collection_id: +picker.dataset.color,
+          color: picker.value
+        });
+        await refresh();
+      }, 'Date color updated');
+    });
+
+    // Do not let clicking the color picker pin or unpin the collection row.
+    $('#legend').addEventListener('click', ev => {
+      if (ev.target.closest('[data-color]')) ev.stopPropagation();
+    });
+
     $('#legend').addEventListener('mouseover', ev => { const r = ev.target.closest('.lrow'); focusCol(r ? +r.dataset.id : pinned); });
     $('#legend').addEventListener('mouseleave', () => focusCol(pinned));
     $('#legend').addEventListener('click', ev => {
       const rem = ev.target.closest('[data-remit]');
       if (rem) { openRemit(+rem.dataset.remit); return; }
+      const rl = ev.target.closest('[data-release]');
+      if (rl) { openRelease(+rl.dataset.release); return; }
       const del = ev.target.closest('[data-del]');
       if (del) {
         if (confirm('Delete this empty collection?')) run(async () => { await api('delete_collection', {collection_id: +del.dataset.del}); await refresh(); }, 'Collection deleted');
@@ -370,6 +444,17 @@
         await refresh();
         toast('Remittance saved');
       } catch (err) { $('#remitErr').textContent = err.message; }
+    });
+
+    $('#releaseForm').addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const f = ev.target;
+      try {
+        await api('release', {collection_id: +f.dataset.id, released_on: f.elements.released_on.value, amount: parseFloat(f.elements.amount.value), note: f.elements.note.value});
+        $('#releaseDlg').close();
+        await refresh();
+        toast('Release saved');
+      } catch (err) { $('#releaseErr').textContent = err.message; }
     });
 
     $('#btnAddPeriod').addEventListener('click', () => openPeriod(0));

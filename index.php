@@ -117,6 +117,20 @@ page_header('Ledger', 'ledger');
   </form>
 </dialog>
 
+
+<dialog id="releaseDlg">
+  <form id="releaseForm" class="stack">
+    <h3 id="releaseTitle">Release collection</h3>
+    <p class="muted" id="releaseMeta"></p>
+    <ul class="bycol" id="releaseBreak"></ul>
+    <label>Date released <input type="date" name="released_on" required></label>
+    <label>Amount <input type="number" name="amount" step="0.01" min="0.01" required inputmode="decimal"></label>
+    <label>Note <input name="note" maxlength="255" placeholder="Optional"></label>
+    <p class="err" id="releaseErr" role="alert"></p>
+    <div class="actions"><span class="spacer"></span><button type="button" data-close>Cancel</button><button class="primary">Save release</button></div>
+  </form>
+</dialog>
+
 <dialog id="periodDlg">
   <form id="periodForm" class="stack">
     <h3 id="periodTitle">Add a column</h3>
