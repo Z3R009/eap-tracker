@@ -125,10 +125,11 @@ function page_header(string $title, string $active = ''): void
         $links = [
             'ledger'    => ['index.php', 'Ledger'],
             'arrears'   => ['arrears.php', 'Who still owes'],
-            'employees' => ['employees.php', 'Employees'],
+            // 'employees' => ['employees.php', 'Employees'],
         ];
         if ($u['role'] === 'admin') {
             $links['users'] = ['users.php', 'Users'];
+            $links['employees'] = ['employees.php', 'Employees'];
             $links['audit'] = ['audit.php', 'History'];
         }
         if (cfg('public_view') !== false) {
