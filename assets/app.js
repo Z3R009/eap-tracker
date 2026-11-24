@@ -463,7 +463,7 @@
       } catch (err) { $('#releaseErr').textContent = err.message; }
     });
 
-    $('#btnAddPeriod').addEventListener('click', () => openPeriod(0));
+    $('#btnAddPeriod')?.addEventListener('click', () => openPeriod(0));
     $('#periodForm').addEventListener('submit', async ev => {
       ev.preventDefault();
       const f = ev.target;
@@ -508,7 +508,7 @@
       });
     }
 
-    $('#btnAddEmp').addEventListener('click', () => { $('#empForm').reset(); $('#empErr').textContent = ''; $('#empDlg').showModal(); });
+    $('#btnAddEmp')?.addEventListener('click', () => { $('#empForm').reset(); $('#empErr').textContent = ''; $('#empDlg').showModal(); });
     $('#empForm').addEventListener('submit', async ev => {
       ev.preventDefault();
       const f = ev.target;

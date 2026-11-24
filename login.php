@@ -59,7 +59,7 @@ page_header($firstRun ? 'Create admin account' : 'Sign in');
         <?php if ($firstRun): ?>
             <label>Your full name <input name="full_name" required autocomplete="name"></label>
         <?php endif; ?>
-        <label>Username <input name="username" required autocomplete="username" autofocus></label>
+        <label>Username <input name="username" required autocomplete="off" autofocus></label>
         <label>Password <input type="password" name="password" required autocomplete="<?= $firstRun ? 'new-password' : 'current-password' ?>"></label>
         <button class="primary"><?= $firstRun ? 'Create account and sign in' : 'Sign in' ?></button>
     </form>

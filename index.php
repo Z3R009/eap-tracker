@@ -56,9 +56,13 @@ page_header('Ledger', 'ledger');
     <label class="inline"><input type="checkbox" id="quick"> Tap a cell to pay the usual amount</label>
     <span class="spacer"></span>
     <input type="search" id="search" placeholder="Find an employee" aria-label="Find an employee">
-    <button id="btnAddPeriod">Add column</button>
-    <button id="btnAddEmp">Add employee</button>
-    <?php if (is_admin()): ?><button id="btnNewYear">New year</button><button id="btnAddTab">Add tab</button><?php endif; ?>
+
+    <?php if (is_admin()): ?>
+      <button id="btnAddEmp">Add employee</button>
+      <button id="btnAddPeriod">Add column</button>
+      <button id="btnNewYear">New year</button>
+      <button id="btnAddTab">Add tab</button>
+    <?php endif; ?>
   </section>
 
   <div class="gridwrap">
