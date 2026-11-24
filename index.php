@@ -48,9 +48,10 @@ page_header('Ledger', 'ledger');
 
   <section class="toolbar">
     <button class="primary" id="btnToday">Collect today</button>
-    <label class="inline">Recording into
+    <label class="inline">Collection
       <span class="swatch" id="activeSwatch"></span>
       <select id="activeCol"></select>
+      <small class="muted" id="activeHint"></small>
     </label>
     <label class="inline"><input type="checkbox" id="quick"> Tap a cell to pay the usual amount</label>
     <span class="spacer"></span>

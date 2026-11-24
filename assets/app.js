@@ -1,4 +1,3 @@
-
 (function () {
   'use strict';
   const E = window.EAP;
@@ -87,14 +86,19 @@
 
   function renderActive() {
     const sel = $('#activeCol');
-    const open = S.collections.filter(c => !c.locked).slice().reverse();
-    sel.innerHTML = '<option value="0">Not recording</option>' + open.map(c =>
-      '<option value="' + c.id + '">' + esc(dateFmt(c.collected_on)) + (c.note ? ' - ' + esc(c.note) : '') + '</option>').join('');
+    const all = S.collections.slice().reverse();
+    const state = c => c.release_status === 'released' ? 'remitted, released' : c.release_status === 'partial' ? 'remitted, part released' : 'remitted';
+    const opt = c => '<option value="' + c.id + '">' + esc(dateFmt(c.collected_on) + (c.note ? ' - ' + c.note : '') + (c.locked ? ' (' + state(c) + ')' : '')) + '</option>';
+    const openList = all.filter(c => !c.locked), doneList = all.filter(c => c.locked);
+    sel.innerHTML = '<option value="0">Not recording</option>' +
+      (openList.length ? '<optgroup label="Open - can record">' + openList.map(opt).join('') + '</optgroup>' : '') +
+      (doneList.length ? '<optgroup label="Remitted - view only">' + doneList.map(opt).join('') + '</optgroup>' : '');
     sel.value = String(S.active || 0);
     const col = colById.get(S.active);
     const sw = $('#activeSwatch');
     sw.style.background = col ? col.color : 'transparent';
     sw.classList.toggle('on', !!col);
+    $('#activeHint').textContent = col && col.locked ? 'View only. Pick an open date to record.' : '';
   }
 
   function owes(e, p) {
@@ -267,7 +271,8 @@
     const list = cur && cur.locked ? [cur].concat(open) : open;
     f.elements.collection_id.innerHTML = list.map(c => '<option value="' + c.id + '">' + esc(dateFmt(c.collected_on)) + (c.locked ? ' (remitted)' : '') + '</option>').join('') +
       '<option value="new">Another date...</option>';
-    f.elements.collection_id.value = String(cur ? cur.id : (S.active || (open[0] ? open[0].id : 'new')));
+    const act = colById.get(S.active);
+    f.elements.collection_id.value = String(cur ? cur.id : (act && !act.locked ? act.id : (open[0] ? open[0].id : 'new')));
     f.elements.new_date.value = S.today;
     f.elements.new_date.max = S.today;
     const locked = !!(cur && cur.locked);
@@ -359,7 +364,8 @@
       if (!td) return;
       const e = +td.dataset.e, p = +td.dataset.p;
       const pay = pays.get(e + ':' + p);
-      if (!pay && $('#quick').checked && S.active && !ev.shiftKey) { quickPay(e, p); return; }
+      const live = colById.get(S.active);
+      if (!pay && $('#quick').checked && live && !live.locked && !ev.shiftKey) { quickPay(e, p); return; }
       openPay(e, p, pay);
     });
 

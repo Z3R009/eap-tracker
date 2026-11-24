@@ -151,7 +151,7 @@ function build_state(int $fundId): array
     $active = (int)($_SESSION['active'][$fundId] ?? 0);
     $ok = false;
     foreach ($collections as $c) {
-        if ($c['id'] === $active && !$c['locked']) {
+        if ($c['id'] === $active) {
             $ok = true;
         }
     }

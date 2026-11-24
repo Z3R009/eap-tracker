@@ -74,8 +74,8 @@ try {
             $id = (int)($in['collection_id'] ?? 0);
             if ($id) {
                 $c = collection_by_id($id);
-                if (!$c || $c['fund_id'] !== $fundId || $c['locked']) {
-                    throw new ApiError('That collection is not open for recording.');
+                if (!$c || $c['fund_id'] !== $fundId) {
+                    throw new ApiError('That collection was not found.');
                 }
             }
             $_SESSION['active'][$fundId] = $id;
